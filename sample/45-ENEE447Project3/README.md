@@ -1,4 +1,4 @@
-# Project 3: Preemptive Multitasking + Cooperative Multitasking 
+# ENEE447 2024 Spring Project 3: Preemptive Multitasking + Cooperative Multitasking 
 
 ## What are we doing in this project?
 In this project, we will try to combine cooperative multitasking (which we have studied in project 1) and preemptive multitasking (which we have implemented in project 2).
@@ -58,13 +58,14 @@ In this project, we will try to combine cooperative multitasking (which we have 
 1. Identify the critical section in `scheduler.cpp` where the race condition occurs, and write code to prevent that race condition from happening.
 	- Hint: You probably will need to call [`EnableIRQs` and `DisableIRQs`](../../include/circle/synchronize.h#L46-L47).
 
-## What to submit on ELMS before your lab in the week of Apr 3 (you have 2 weeks + 1 week of spring break):
+## What to submit on ELMS before your lab in the week of Apr 15:
 1. A pdf that has:
 	- Members of your group.
 	- A screenshot/photo that shows problem 1 is solved.
 	- A screenshot/photo that shows problem 2 is solved.
 1. The file `taskswitch.S` in which you have implemented the `TODO`s under the label `TaskSwitch` for sovling problem 1.
 1. The file `scheduler.cpp` in which you have written code to prevent some race condition from happening for solving problem 2.
+1. Description of your implementation including reasons why you have to modify it. 
 
 ## Documents for reference
 - [1] [ARM Architecture Reference Manual](https://documentation-service.arm.com/static/5f8dacc8f86e16515cdb865a)
