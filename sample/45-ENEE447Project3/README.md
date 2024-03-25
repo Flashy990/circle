@@ -30,6 +30,7 @@ In this project, we will try to combine cooperative multitasking (which we have 
 	- Hint: You probably will need to use the following assembly instructions:
 		- `cps` for switching into IRQ mode and disabling IRQ interrupt
 		- `mrs` for reading the value of `cpsr` register
+		- [Reference](https://developer.arm.com/documentation/den0013/d/Interrupt-Handling/External-interrupt-requests/Simplistic-interrupt-handling) 
 
 ### Problem 2: Identify and protect critical sections (in `scheduler.cpp`) in which IRQ interrupts should be temporarily disabled (because we don't want preemptive multitasking to occur in those critical sections).
 - Before solving problem 2, make sure you have done the following:
