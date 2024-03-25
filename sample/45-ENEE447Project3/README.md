@@ -58,7 +58,7 @@ In this project, we will try to combine cooperative multitasking (which we have 
 1. Identify the critical section in `scheduler.cpp` where the race condition occurs, and write code to prevent that race condition from happening.
 	- Hint: You probably will need to call [`EnableIRQs` and `DisableIRQs`](../../include/circle/synchronize.h#L46-L47).
 
-## What to submit on ELMS before your lab in the week of Apr 15:
+## What to submit on ELMS before your lab in the week of Apr 14:
 1. A pdf that has:
 	- Members of your group.
 	- A screenshot/photo that shows problem 1 is solved.
