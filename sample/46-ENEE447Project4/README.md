@@ -1,4 +1,4 @@
-# Project 4 (20 points): Running a task in user mode with its own virtual memory space
+# ENEE447 2024 Spring Project 4: Running a task in user mode with its own virtual memory space
 
 ## What are we doing in this project?
 In this project, we will try to run a task in user mode with its own virtual memory space.
