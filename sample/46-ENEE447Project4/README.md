@@ -56,7 +56,7 @@ Specifically, this means:
 	- A screenshot/photo that shows problem 2 is solved.
 1. `task.cpp` in which you have implemented the TODOs. (You can edit `task.h`)
 1. `syscallhandler.cpp` in which you have implemented the TODOs.
-1. Description of your imlementation
+1. Description of your implementation **in detail**
 
 ## Documents for reference
 - [1] [ARM Architecture Reference Manual](https://documentation-service.arm.com/static/5f8dacc8f86e16515cdb865a)
