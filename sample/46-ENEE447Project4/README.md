@@ -23,7 +23,7 @@ Specifically, this means:
 
 ### Before you start, copy your project 3 solution to [here](../../lib/sched/taskswitch.S#L27-L30) and [here](../../lib/sched/scheduler.cpp#L1).
 
-### Problem 1 (10 points): Set up virtual memory for the user mode task.
+### Problem 1 : Set up virtual memory for the user mode task.
 - Currently, when we run this sample, it will have an error:
 
 <img src="img/project 4 after copying p3 sol_part 1 init state_Run called.png" width="500">
@@ -35,8 +35,9 @@ Specifically, this means:
 #### Specifically, to solve problem 1, you are supposed to do the following:
 - Implement the following TODOs:
   - TODOs in [`task.cpp`](../../lib/sched/task.cpp#L204-L260)
+  - You can edit `task.h` as well. 
   
-### Problem 2 (10 points): Implement system calls so that the user task can trap into kernel mode and do privileged things
+### Problem 2 : Implement system calls so that the user task can trap into kernel mode and do privileged things
 - At the end of problem 1, we have the user task running but there is no output.
 - But the user task should have output. See its definition [here](user_mode_task/main.c).
 - The reason why there is no output is because all the [system calls used by the user task are not yet implemented](user_mode_task/my_c_library.c#L43-L81).
@@ -48,13 +49,14 @@ Specifically, this means:
 - Implement the following TODOs:
   - TODOs in [`syscallhandler.cpp`](../../lib/syscallhandler.cpp#L10)
 
-## What to submit on ELMS before your lab in the week of May 1 (you have 3 weeks):
+## What to submit on ELMS before your lab in the week of May 5th:
 1. A pdf that has:
 	- Members of your group.
 	- A screenshot/photo that shows problem 1 is solved.
 	- A screenshot/photo that shows problem 2 is solved.
-1. `task.cpp` in which you have implemented the TODOs.
+1. `task.cpp` in which you have implemented the TODOs. (You can edit `task.h`)
 1. `syscallhandler.cpp` in which you have implemented the TODOs.
+1. Description of your imlementation
 
 ## Documents for reference
 - [1] [ARM Architecture Reference Manual](https://documentation-service.arm.com/static/5f8dacc8f86e16515cdb865a)
