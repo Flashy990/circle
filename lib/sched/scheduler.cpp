@@ -375,6 +375,9 @@ unsigned CScheduler::GetNextTask (void)
 
 	unsigned nTicks = CTimer::Get ()->GetClockTicks ();
 
+	unsigned maxPriority = 0;
+	unsigned maxPriorityIdx = 0;
+
 	for (unsigned i = 1; i <= m_nTasks; i++)
 	{
 		if (++nTask >= m_nTasks)
@@ -383,6 +386,7 @@ unsigned CScheduler::GetNextTask (void)
 		}
 
 		CTask *pTask = m_pTask[nTask];
+		CTask *maxPTask = m_pTask[maxPriorityIdx];
 		if (pTask == 0)
 		{
 			continue;
@@ -396,7 +400,14 @@ unsigned CScheduler::GetNextTask (void)
 		switch (pTask->GetState ())
 		{
 		case TaskStateReady:
-			return nTask;
+			//return nTask;
+			//priorityList.push_back(nTask);
+			if (pTask->GetTaskPriority() >= maxPTask->GetTaskPriority()) 
+			{
+				maxPriority = pTask->GetTaskPriority();
+				maxPriorityIdx = nTask;
+			}
+			break;
 
 		case TaskStateBlocked:
 		case TaskStateNew:
@@ -409,7 +420,13 @@ unsigned CScheduler::GetNextTask (void)
 			}
 			pTask->SetState (TaskStateReady);
 			pTask->SetWakeTicks(0);		// Use as flag that timeout expired
-			return nTask;
+			//return nTask;
+			if (pTask->GetTaskPriority() >= maxPTask->GetTaskPriority()) 
+			{
+				maxPriority = pTask->GetTaskPriority();
+				maxPriorityIdx = nTask;
+			}
+			break;
 
 
 		case TaskStateSleeping:
@@ -418,7 +435,14 @@ unsigned CScheduler::GetNextTask (void)
 				continue;
 			}
 			pTask->SetState (TaskStateReady);
-			return nTask;
+			//return nTask;
+			if (pTask->GetTaskPriority() >= maxPTask->GetTaskPriority()) 
+			{
+				maxPriority = pTask->GetTaskPriority();
+				maxPriorityIdx = nTask;
+			}
+			break;
+
 
 		case TaskStateTerminated:
 			if (m_pTaskTerminationHandler != 0)
@@ -434,9 +458,81 @@ unsigned CScheduler::GetNextTask (void)
 			break;
 		}
 	}
-
-	return MAX_TASKS;
+	if (maxPriority == 0)
+	{
+		return MAX_TASKS;
+	} else {
+		return maxPriorityIdx;
+	}
+// return MAX_TASKS;
 }
+// unsigned CScheduler::GetNextTask (void)
+// {
+// 	unsigned nTask = m_nCurrent < MAX_TASKS ? m_nCurrent : 0;
+
+// 	unsigned nTicks = CTimer::Get ()->GetClockTicks ();
+
+// 	for (unsigned i = 1; i <= m_nTasks; i++)
+// 	{
+// 		if (++nTask >= m_nTasks)
+// 		{
+// 			nTask = 0;
+// 		}
+
+// 		CTask *pTask = m_pTask[nTask];
+// 		if (pTask == 0)
+// 		{
+// 			continue;
+// 		}
+
+// 		if (pTask->IsSuspended ())
+// 		{
+// 			continue;
+// 		}
+
+// 		switch (pTask->GetState ())
+// 		{
+// 		case TaskStateReady:
+// 			return nTask;
+
+// 		case TaskStateBlocked:
+// 		case TaskStateNew:
+// 			continue;
+
+// 		case TaskStateBlockedWithTimeout:
+// 			if ((int) (pTask->GetWakeTicks () - nTicks) > 0)
+// 			{
+// 				continue;
+// 			}
+// 			pTask->SetState (TaskStateReady);
+// 			pTask->SetWakeTicks(0);		// Use as flag that timeout expired
+// 			return nTask;
+
+
+// 		case TaskStateSleeping:
+// 			if ((int) (pTask->GetWakeTicks () - nTicks) > 0)
+// 			{
+// 				continue;
+// 			}
+// 			pTask->SetState (TaskStateReady);
+// 			return nTask;
+
+// 		case TaskStateTerminated:
+// 			if (m_pTaskTerminationHandler != 0)
+// 			{
+// 				(*m_pTaskTerminationHandler) (pTask);
+// 			}
+// 			RemoveTask (pTask);
+// 			delete pTask;
+// 			return MAX_TASKS;
+
+// 		default:
+// 			assert (0);
+// 			break;
+// 		}
+// 	}
+// return MAX_TASKS;
+// }
 
 CScheduler *CScheduler::Get (void)
 {
