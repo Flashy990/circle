@@ -25,7 +25,7 @@
 	.globl	TaskSwitch
 TaskSwitch:
 	// TODO: delete the instruction below: 
-	bx	lr
+	// bx	lr
 
 	// TODO: Implement `TaskSwitch`
 	// Hint: 
@@ -42,6 +42,28 @@ TaskSwitch:
 	//	- Write codes here so that the assumptions are satisfied.
 	//	- Jump to __contextswitch_impl.
 
+	// From the project3 description, we know that we are going to need cps and mrs
+	// cps is for switching into IRQ mode and disabling IRQ interrupts
+	// mrs for reading the value of cpsr register
+	// what are cprs registers tho?
+	// - cpsr registers are current program status registers. it stores the current
+	// 		  status of the processor
+
+	// read the value of cpsr into a register
+	mrs r0, cpsr
+	// move the value of link register into another register
+	mov r1, lr
+	// use cpsid instrustion to change processor state
+	// disable IRQ interrupts and changes the processor state to IRQ mode
+	cpsid i, #0x12
+	// using spsr_cxsf to save the cpsr of the current mode before switching to
+	// a different mode
+	// this will allow the processor to restore the prev state
+	msr spsr_cxsf, r0
+	// move the register value back into the link register
+	mov lr, r1
+	// unconditional branch to __contextswitch_impl
+	b __contextswitch_impl
 #else
 
 	.globl	TaskSwitch
