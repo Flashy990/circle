@@ -211,8 +211,28 @@ void CScheduler::ListTasks (CDevice *pTarget)
 	}
 }
 
+
 void CScheduler::AddTask (CTask *pTask)
 {
+	// variable to store the value of the Current Program Status Register (CPSR)
+	u32 curr_cpsr_val;
+
+	// using 'asm volatile (your-arm-command)', which we talked about in lab
+	// assembly language inline to read the value of CPSR into curr_cpsr_val
+	asm volatile ("mrs %0, cpsr" : "=r" (curr_cpsr_val));
+
+	// flag indicating whether the function is executed within a critical section
+	bool incritsection = false;
+
+	// check if IRQs are enabled by examining the 7th bit of curr_cpsr_val
+	auto seventh_bit_cpsr = (curr_cpsr_val >> 7) & 1;
+	
+	// if IRQs are enabled, set incritsection to true and disable IRQ using DisableIRQs(); so we
+	// would ensure that task addition is performed atomically
+	if (seventh_bit_cpsr == 0) {
+		incritsection = true;
+		DisableIRQs();
+	}
 	assert (pTask != 0);
 
 	if (m_iSuspendNewTasks)
@@ -225,6 +245,10 @@ void CScheduler::AddTask (CTask *pTask)
 		if (m_pTask[i] == 0)
 		{
 			m_pTask[i] = pTask;
+			// if we are in the critical section, re-enable interrupts before returning
+			if (incritsection == true) {
+				EnableIRQs();
+			}
 			return;
 		}
 	}
@@ -235,7 +259,12 @@ void CScheduler::AddTask (CTask *pTask)
 	}
 
 	m_pTask[m_nTasks++] = pTask;
+	// if we are in the critical section, re-enable interrupts before returning
+	if (incritsection == true) {
+		EnableIRQs();
+	}
 }
+
 
 boolean CScheduler::BlockTask (CTask **ppWaitListHead, unsigned nMicroSeconds)
 {
@@ -512,5 +541,48 @@ void ContextSwitchOnIrqReturn_by_modifyingTaskContextSavedByIrqStub(TTaskRegiste
 	// TODO: Copy your working project 2 solution to here
 	// (TAs will publish project 2 solution later after 
 	// all lab sections have concluded project 2)
+
+	should_contextswith_on_irq_return = 0;
+	CScheduler* scheduler = CScheduler::Get();
+	CTask *pNext = scheduler->m_pCurrent;
+
+	// TODO: You should borrow all codes form Yield but make the following changes:
+	//   1. Use the variable `scheduler` above to fix any compilation errors.
+	//   2. At the end, **DO NOT** just call `TaskSwitch`. Instead, think about
+	//     how this function is supposed to assist the context switch in IRQStub (after you have
+	//     fully understood how IRQStub performs context switch), then write code here to
+	//     make the function do exactly what it is supposed to do.
+	// Cooperative multitasking is disabled for project 2 because it requires
+	//   extra effort to make it compatible with preemptive multitasking
+	while ((scheduler->m_nCurrent = scheduler->GetNextTask ()) == MAX_TASKS)	// no task is ready
+	{
+		assert (scheduler->m_nTasks > 0);
+	}
+
+	assert (scheduler->m_nCurrent < MAX_TASKS);
+	pNext = scheduler->m_pTask[scheduler->m_nCurrent];
+	assert (pNext != 0);
+	if (scheduler->m_pCurrent == pNext)
+	{
+		return;
+	}
+	// CLogger::Get ()->Write (FromScheduler, LogDebug, "Current task is task %s, will switch to task %s.\n", scheduler->m_pCurrent->GetName(), pNext->GetName());
+	TTaskRegisters *pOldRegs = scheduler->m_pCurrent->GetRegs ();
+	scheduler->m_pCurrent = pNext;
+	TTaskRegisters *pNewRegs = scheduler->m_pCurrent->GetRegs ();
+	//TTaskRegisters *pNewRegs = pNext->GetRegs ();
+
+	if (scheduler->m_pTaskSwitchHandler != 0)
+	{
+		(*scheduler->m_pTaskSwitchHandler) (scheduler->m_pCurrent);
+	}
+
+	assert (pOldRegs != 0);
+	assert (pNewRegs != 0);
+	//TaskSwitch (pOldRegs, pNewRegs);
+	(*pOldRegs) = (*regs_saved_by_irq_stub);
+	(*regs_saved_by_irq_stub) = (*pNewRegs);
+
+	//CLogger::Get ()->Write (FromScheduler, LogDebug, "Current task is task %s, will switch to task %s.\n", scheduler->m_pCurrent->GetName(), pNext->GetName());
 
 }
