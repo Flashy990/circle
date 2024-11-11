@@ -229,6 +229,16 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 	//   - For sp, assign `m_user_stack_init_addr` to it.
 	//   - For cpsr, you need to make sure it's user mode and IRQ interrupt is enabled.
 
+
+	// ttbr0 holds the base address of translation table
+	// set up ttbr0
+	m_Regs.ttbr0 = m_pPageTable->GetBaseAddress();
+	// set up pc
+	m_Regs.pc = (u32)m_exe_load_addr;
+	// set up sp
+	m_Regs.sp = (u32)m_user_stack_init_addr;
+	// set it to user mode and enable irq interrupt
+	m_Regs.cpsr = (u32)0x10;
 	void *physical_page_1_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();	
 	void *physical_page_2_baseaddr = CMemorySystem::Get()->UserModeTaskPageAllocate();	
 	assert(physical_page_1_baseaddr != 0);
@@ -248,8 +258,10 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 
 	u32 *pageTable = m_pPageTable->GetPageTable();
 
-	int page_no_1 = 0xFFF; // TODO: figure out what this variable should be.
-	int page_no_2 = 0xFFF; // TODO: figure out what this variable should be.
+	// int page_no_1 = 0xFFF; // TODO: figure out what this variable should be.
+	// int page_no_2 = 0xFFF; // TODO: figure out what this variable should be.
+	int page_no_1 = (u32)m_exe_load_addr / 0x100000;
+	int page_no_2 = (u32)m_user_stack_init_addr / 0x100000;
 
 	pageTable[page_no_1] = (int)physical_page_1_baseaddr | 0xC0E;
 	pageTable[page_no_2] = (int)physical_page_2_baseaddr | 0xC1E;
@@ -259,13 +271,27 @@ CUserModeTask::CUserModeTask(const char *exe_path)
 
 CUserModeTask::~CUserModeTask(void) {
 	u32 *pageTable = m_pPageTable->GetPageTable();
-
+	const u32 *m_exe_load_addr = (u32*)0x80000000;
+	const u32 *m_user_stack_init_addr = (u32*)0x9FFFFFF0;
 	// TODO: Deallocate the physical pages of this task.
 	// Hint: You can do something like:
 	//         void *physical_page_1_baseaddr = ...
 	//         void *physical_page_2_baseaddr = ...
 	//         CMemorySystem::Get()->UserModeTaskPageFree(physical_page_1_baseaddr);
 	//         CMemorySystem::Get()->UserModeTaskPageFree(physical_page_2_baseaddr);
+
+	// pages are 1MB, so lower 20 bits are of no use
+	// need to extract the upper 12 bits
+	// so mask to extract the base address of the physical page from a page table entry will be:
+	const u32 mask = 0xFFF00000;
+	int page_no_1 = (u32)m_exe_load_addr / 0x100000;
+	int page_no_2 = (u32)m_user_stack_init_addr / 0x100000;
+	void *physical_page_1_baseaddr = (void *)(pageTable[page_no_1] & mask);
+	void *physical_page_2_baseaddr = (void *)(pageTable[page_no_2] & mask);
+
+	// deallocate the physical pages of this task
+	CMemorySystem::Get()->UserModeTaskPageFree(physical_page_1_baseaddr);
+	CMemorySystem::Get()->UserModeTaskPageFree(physical_page_2_baseaddr);
 }
 
 void CUserModeTask::Run(void) {
