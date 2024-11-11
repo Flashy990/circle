@@ -25,9 +25,90 @@
 	.globl	TaskSwitch
 TaskSwitch:
 	// TODO: delete the instruction below: 
-	bx	lr
+	// bx	lr
 
-	// TODO: Copy your working project 3 solution to here.
+	// TODO: Implement `TaskSwitch`
+	// Hint: 
+	// We actually don't need to write a lot of codes here because 
+	// a working design of context switch has been implemented in 
+	// project 2 (See `__contextswitch_impl` in `lib/exceptionstub.S`).
+	// 
+	// However, we cannot just jump to `__contextswitch_impl` here because
+	// some assumptions held by `__contextswitch_impl` are not satisfied yet.
+	//
+	// Therefore, we need to do the following:
+	//	- Identify what assumptions held by `__contextswitch_impl` must 
+	// 	  be satisfied before we jump to `__contextswitch_impl`.
+	//	- Write codes here so that the assumptions are satisfied.
+	//	- Jump to __contextswitch_impl.
+
+	// From the project3 description, we know that we are going to need cps and mrs
+	// cps is for switching into IRQ mode and disabling IRQ interrupts
+	// mrs for reading the value of cpsr register
+	// what are cprs registers tho?
+	// - cpsr registers are current program status registers. it stores the current
+	// 		  status of the processor
+
+	// read the value of cpsr into a register
+	mrs r0, cpsr
+	// move the value of link register into another register
+	mov r1, lr
+	// use cpsid instrustion to change processor state
+	// disable IRQ interrupts and changes the processor state to IRQ mode
+	cpsid i, #0x12
+	// using spsr_cxsf to save the cpsr of the current mode before switching to
+	// a different mode
+	// this will allow the processor to restore the prev state
+	msr spsr_cxsf, r0
+	// move the register value back into the link register
+	mov lr, r1
+	// unconditional branch to __contextswitch_impl
+	b __contextswitch_impl
+#else
+
+	.globl	TaskSwitch
+TaskSwitch:					/* x0: pOldRegs, x1: pNewRegs */
+	add	x0, x0, #8			/* x0 is not saved */
+	stp	x16, x17, [x0], #16
+	stp	x18, x19, [x0], #16
+	stp	x20, x21, [x0], #16
+	stp	x22, x23, [x0], #16
+	stp	x24, x25, [x0], #16
+	stp	x26, x27, [x0], #16
+	stp	x28, x29, [x0], #16
+	mov	x2, sp
+	stp	x30, x2, [x0], #16
+
+	stp	d8, d9, [x0], #16
+	stp	d10, d11, [x0], #16
+	stp	d12, d13, [x0], #16
+	stp	d14, d15, [x0], #16
+	mrs	x2, fpcr
+	mrs	x3, fpsr
+	stp	x2, x3, [x0], #16
+
+	ldr	x0, [x1], #8			/* parameter for CTask::TaskEntry() */
+	ldp	x16, x17, [x1], #16
+	ldp	x18, x19, [x1], #16
+	ldp	x20, x21, [x1], #16
+	ldp	x22, x23, [x1], #16
+	ldp	x24, x25, [x1], #16
+	ldp	x26, x27, [x1], #16
+	ldp	x28, x29, [x1], #16
+	ldp	x30, x2, [x1], #16
+	mov	sp, x2
+
+	ldp	d8, d9, [x1], #16
+	ldp	d10, d11, [x1], #16
+	ldp	d12, d13, [x1], #16
+	ldp	d14, d15, [x1], #16
+	ldp	x2, x3, [x1], #16
+	msr	fpcr, x2
+	msr	fpsr, x3
+
+	ret
+
+#endif
 
 
 
