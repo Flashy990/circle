@@ -64,52 +64,6 @@ TaskSwitch:
 	mov lr, r1
 	// unconditional branch to __contextswitch_impl
 	b __contextswitch_impl
-#else
-
-	.globl	TaskSwitch
-TaskSwitch:					/* x0: pOldRegs, x1: pNewRegs */
-	add	x0, x0, #8			/* x0 is not saved */
-	stp	x16, x17, [x0], #16
-	stp	x18, x19, [x0], #16
-	stp	x20, x21, [x0], #16
-	stp	x22, x23, [x0], #16
-	stp	x24, x25, [x0], #16
-	stp	x26, x27, [x0], #16
-	stp	x28, x29, [x0], #16
-	mov	x2, sp
-	stp	x30, x2, [x0], #16
-
-	stp	d8, d9, [x0], #16
-	stp	d10, d11, [x0], #16
-	stp	d12, d13, [x0], #16
-	stp	d14, d15, [x0], #16
-	mrs	x2, fpcr
-	mrs	x3, fpsr
-	stp	x2, x3, [x0], #16
-
-	ldr	x0, [x1], #8			/* parameter for CTask::TaskEntry() */
-	ldp	x16, x17, [x1], #16
-	ldp	x18, x19, [x1], #16
-	ldp	x20, x21, [x1], #16
-	ldp	x22, x23, [x1], #16
-	ldp	x24, x25, [x1], #16
-	ldp	x26, x27, [x1], #16
-	ldp	x28, x29, [x1], #16
-	ldp	x30, x2, [x1], #16
-	mov	sp, x2
-
-	ldp	d8, d9, [x1], #16
-	ldp	d10, d11, [x1], #16
-	ldp	d12, d13, [x1], #16
-	ldp	d14, d15, [x1], #16
-	ldp	x2, x3, [x1], #16
-	msr	fpcr, x2
-	msr	fpsr, x3
-
-	ret
-
-#endif
-
 
 
 	.global readTTBR0
