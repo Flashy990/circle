@@ -204,7 +204,7 @@ __contextswitch_impl:
 
 	// Restore next task's pc and at the same time deallocte the space 
 	//   previosuly allocated for saving it
-	ldmia	sp!, {pc}^ // NOTE: "^" is needed because 
+	ldmia	sp!, {pc}^ //"^" is needed because 
 			   //   according to A4.1.22 LDM (3) in [1], "for an LDM 
 			   //   instruction that loads the PC, this indicates that 
 			   //   the SPSR of the current mode is copied to the CPSR", 
